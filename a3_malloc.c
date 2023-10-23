@@ -108,6 +108,34 @@ void *m_malloc(size_t size) {
     return ptr;
 }
 
+int m_check(void) {
+    h_Node *current_node = heap;
+    h_Node *previous_node = NULL;
+    int index = 0;
+
+    // Go through entire Heap
+    while (current_node) {
+        current_node->STATUS = 0;
+
+        // Check if following block can be merged
+        h_Node *next_block = current_node->NEXT;
+        if ((next_block != NULL) && (!next_block->STATUS)) {
+            printf("NEXT_BLOCK can be merged with CURRENT_BLOCK number: %d\n", index);
+            return -1;
+        }
+
+        // Check if previous block can be merged
+        if ((previous_node != NULL) && (!previous_node->STATUS)) {
+            printf("PREVIOUS_BLOCK can be merged with CURRENT_BLOCK number: %d\n", index);
+            return -1;
+        }
+        previous_node = current_node;
+        current_node = current_node->NEXT;
+        index++;
+    }
+    return 0;
+}
+
 void m_free(void *ptr) {
     if (ptr == NULL) {
         perror("[m_free] Error: pointer passed as parameter is NULL.");

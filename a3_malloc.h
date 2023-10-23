@@ -28,6 +28,8 @@ void *m_malloc(size_t size);
 void m_free(void *ptr);
 // Re allocate a block of new size equal to size (ptr is freed and returns a new ptr)
 void *m_realloc(void *ptr, size_t size);
+// Check if heap is consistent, return 0 if no blocks are to be merged -1 else
+int m_check(void);
 
 // Display all blocks information contained in the heap
 void h_layout(struct h_Node *ptr);
