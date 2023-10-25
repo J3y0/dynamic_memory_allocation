@@ -40,6 +40,10 @@ int m_init(void) {
 }
 
 void *m_malloc(size_t size) {
+    if (size == 0) {
+        return NULL;
+    }
+
     void *ptr = NULL;
     h_Node *current_node = heap;
     h_Node *previous_node = NULL;
@@ -115,8 +119,6 @@ int m_check(void) {
 
     // Go through entire Heap
     while (current_node) {
-        current_node->STATUS = 0;
-
         // Check if following block can be merged
         h_Node *next_block = current_node->NEXT;
         if ((next_block != NULL) && (!next_block->STATUS)) {
@@ -211,6 +213,23 @@ void *m_realloc(void *ptr, size_t size) {
     return new_ptr;
 }
 
+void space_utilization() {
+    h_Node *current_node = heap;
+    float space_u = 0.0;
+    float total_size = 0.0;
+
+    // Go through entire Heap
+    while (current_node) {
+        if (current_node->STATUS) {
+            space_u += current_node->SIZE;
+        }
+
+        total_size += current_node->SIZE;
+        current_node = current_node->NEXT;
+    }
+    printf("%.2f\n", space_u/total_size);
+}
+
 int main() {
     if (m_init()) {
         perror("Failed to initialize heap area.\n");
@@ -220,37 +239,44 @@ int main() {
 
     // Initial heap
     h_layout(heap);
+    space_utilization();
+    char *pt1 = m_malloc(2000);
+    h_layout(heap);
+    space_utilization();
+    char *pt2 = m_malloc(500);
+    h_layout(heap);
+    space_utilization();
+    char *pt3 = m_malloc(300);
+    h_layout(heap);
+    space_utilization();
+    m_free(pt2);
+    h_layout(heap);
+    space_utilization();
+    char *pt4 = m_malloc(1500);
+    h_layout(heap);
+    space_utilization();
 
-    int *ptr_int = m_malloc(sizeof(int));
-    if (ptr_int == NULL) {
-        printf("Error while allocating memory with m_malloc.");
-        return 1;
+    // Should fail
+    char *ptr_fail = m_malloc(0);
+    if (ptr_fail == NULL) {
+        printf("m_malloc failed allocation;\n");
+        h_layout(heap);
+        space_utilization();
+    } else {
+        m_free(ptr_fail);
+        h_layout(heap);
+        space_utilization();
     }
-    h_layout(heap);
-    *ptr_int = 4;
 
-    double *new_ptr_dbl = m_realloc(ptr_int, sizeof(double));
-    *new_ptr_dbl = 4.0;
+    m_free(pt1);
     h_layout(heap);
-
-    double *another_dbl = m_malloc(sizeof(double));
-    *another_dbl = 3.2;
-
+    space_utilization();
+    m_free(pt3);
     h_layout(heap);
-
-    char *c = m_malloc(sizeof(char));
-    *c = 'a';
-
+    space_utilization();
+    m_free(pt4);
     h_layout(heap);
-    
-    m_free(new_ptr_dbl);
-    h_layout(heap);
-
-    m_free(c);
-    h_layout(heap);
-
-    m_free(another_dbl);
-    h_layout(heap);
+    space_utilization();
 
     return 0;
 }
